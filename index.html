@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Froze Sandbox</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f0f9ff;
+      --surface: #ffffff;
+      --border: #bae6fd;
+      --accent: #38bdf8;
+      --accent-dark: #0ea5e9;
+      --accent-soft: #e0f2fe;
+      --text: #0c2340;
+      --muted: #64a0be;
+      --tag-bg: #e0f2fe;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; right: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(56,189,248,0.18) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -150px; left: -150px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(56,189,248,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 60px 24px 100px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-bottom: 60px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .avatar {
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      background: var(--accent-soft);
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      color: var(--accent-dark);
+    }
+
+    .header-info h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    .header-info h1 span { color: var(--accent-dark); }
+
+    .header-info .handle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .tag {
+      background: var(--tag-bg);
+      color: var(--accent-dark);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── BIO ── */
+    .bio {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 48px;
+      line-height: 1.85;
+      font-size: 14px;
+      color: #3a6a8a;
+      animation: fadeUp 0.6s 0.1s ease both;
+      opacity: 0;
+    }
+
+    .bio strong { color: var(--text); font-weight: 700; }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── SITE LIST ── */
+    .sites {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 52px;
+      animation: fadeUp 0.6s 0.2s ease both;
+      opacity: 0;
+    }
+
+    .site-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+
+    .site-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 24px rgba(56,189,248,0.15);
+      transform: translateY(-2px);
+    }
+
+    .site-card-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .site-icon {
+      width: 44px; height: 44px;
+      background: var(--accent-soft);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .site-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+    }
+
+    .site-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .site-arrow {
+      font-size: 18px;
+      color: var(--border);
+      flex-shrink: 0;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .site-card:hover .site-arrow {
+      color: var(--accent);
+      transform: translateX(3px);
+    }
+
+    .site-card.wip {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .wip-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: #fef9c3;
+      color: #a16207;
+      border: 1px solid #fde68a;
+      padding: 2px 8px;
+      border-radius: 100px;
+      margin-left: 8px;
+    }
+
+    /* ── FUN GRID ── */
+    .fun-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      animation: fadeUp 0.6s 0.3s ease both;
+      opacity: 0;
+    }
+
+    @media (max-width: 540px) {
+      .fun-grid { grid-template-columns: 1fr; }
+    }
+
+    .fun-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+
+    .fun-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .fun-card-value {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    .fun-card-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.6;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      margin-top: 64px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="avatar">
+      <!-- 프로필 사진 넣을 때:
+      <img src="profile.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"> -->
+      ❄️
+    </div>
+    <div class="header-info">
+      <h1>Froze <span>Sandbox</span></h1>
+      <div class="handle">by Froze · georgiavegas.github.io</div>
+      <div class="tags">
+        <span class="tag">🎮 Gamer</span>
+        <span class="tag">🔧 Dev Newbie</span>
+        <span class="tag">💻 Hobby Coder</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- BIO -->
+  <div class="bio">
+    안녕하세요, <strong>Froze</strong>입니다. 👋<br/>
+    이제 막 개발을 취미로 시작한 뉴비예요. 게임도 열심히 하면서 틈틈이 이것저것 만들어보고 있습니다.
+    여기는 제가 만든 것들을 모아두는 공간이에요.
+  </div>
+
+  <!-- SITE LIST -->
+  <div class="section-title">Projects & Sites</div>
+  <div class="sites">
+
+    <a href="./jellenarchive/" class="site-card">
+      <div class="site-card-left">
+        <div class="site-icon">📦</div>
+        <div>
+          <div class="site-name">Jellen Archive</div>
+          <div class="site-desc">아카이브 프로젝트</div>
+        </div>
+      </div>
+      <div class="site-arrow">→</div>
+    </a>
+
+    <div class="site-card wip">
+      <div class="site-card-left">
+        <div class="site-icon">🎮</div>
+        <div>
+          <div class="site-name">다음 프로젝트 <span class="wip-badge">WIP</span></div>
+          <div class="site-desc">준비 중...</div>
+        </div>
+      </div>
+      <div class="site-arrow">→</div>
+    </div>
+
+    <div class="site-card wip">
+      <div class="site-card-left">
+        <div class="site-icon">✨</div>
+        <div>
+          <div class="site-name">또 다른 프로젝트 <span class="wip-badge">WIP</span></div>
+          <div class="site-desc">아이디어 구상 중...</div>
+        </div>
+      </div>
+      <div class="site-arrow">→</div>
+    </div>
+
+  </div>
+
+  <!-- ABOUT CARDS -->
+  <div class="section-title">About</div>
+  <div class="fun-grid">
+    <div class="fun-card">
+      <div class="fun-card-label">🎮 요즘 하는 게임</div>
+      <div class="fun-card-value">???</div>
+      <div class="fun-card-sub">게임 이름 적어보세요</div>
+    </div>
+    <div class="fun-card">
+      <div class="fun-card-label">🔧 요즘 만드는 것</div>
+      <div class="fun-card-value">Jellen Archive</div>
+      <div class="fun-card-sub">아카이브 사이트 개발 중</div>
+    </div>
+    <div class="fun-card">
+      <div class="fun-card-label">📚 배우는 중</div>
+      <div class="fun-card-value">HTML / CSS</div>
+      <div class="fun-card-sub">GitHub Pages로 배포하기</div>
+    </div>
+    <div class="fun-card">
+      <div class="fun-card-label">☁️ 한마디</div>
+      <div class="fun-card-value">뭐든 일단 만들어보자</div>
+      <div class="fun-card-sub">완성보다 시작이 먼저</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Froze · Made with ☁️ on GitHub Pages</p>
+  </footer>
+
+</div>
+</body>
+</html>
