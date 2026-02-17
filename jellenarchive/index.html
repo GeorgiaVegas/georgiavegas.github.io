@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jellen Archive</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Noto+Sans+KR:wght@300;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f0f9ff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Noto Sans KR', sans-serif;
+      gap: 40px;
+      padding: 40px 20px;
+    }
+
+    /* 로고 자리 */
+    .logo {
+      width: 180px;
+      height: 180px;
+      /* 로고 이미지 넣을 때: <img src="logo.png"> 로 교체 */
+      background: #e0f2fe;
+      border: 3px dashed #38bdf8;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #64a0be;
+      letter-spacing: 0.05em;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 21px;
+    }
+
+    .title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(52px, 12vw, 100px);
+      color: #0c2340;
+      letter-spacing: -0.02em;
+      text-align: center;
+      line-height: 1;
+      animation: fadeUp 0.6s 0.1s ease both;
+      opacity: 0;
+    }
+
+    .title span { color: #0ea5e9; }
+
+    .sub {
+      font-size: 14px;
+      color: #64a0be;
+      letter-spacing: 0.08em;
+      animation: fadeUp 0.6s 0.2s ease both;
+      opacity: 0;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo">
+    <img src="logo.png">
+    로고 자리
+  </div>
+
+  <div class="title">공사<span>중</span></div>
+
+  <div class="sub">JELLEN ARCHIVE · COMING SOON</div>
+
+</body>
+</html>
