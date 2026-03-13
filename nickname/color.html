@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nick Color Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #17171b;
+    --border: #2a2a32;
+    --muted: #555566;
+    --text: #e8e8f0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 560px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    margin-bottom: 2.5rem;
+  }
+
+  .label-mono {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  h1 span {
+    display: inline-block;
+    background: linear-gradient(90deg, #a78bfa, #60a5fa, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .input-area {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+    transition: border-color 0.2s;
+  }
+
+  .input-area:focus-within {
+    border-color: #6366f1;
+  }
+
+  .input-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+    font-family: 'Space Mono', monospace;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 1.25rem;
+    caret-color: #6366f1;
+  }
+
+  input::placeholder { color: var(--muted); }
+
+  /* Preview */
+  .preview-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .color-swatch {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.08);
+    transition: background-color 0.25s ease;
+    box-shadow: 0 0 24px var(--nick-color, transparent);
+  }
+
+  .nick-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    word-break: break-all;
+    transition: color 0.25s ease;
+    line-height: 1.3;
+  }
+
+  .nick-display.empty {
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 0.9rem;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  /* Debug info */
+  .debug-grid {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .debug-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .debug-row:last-child { border-bottom: none; }
+
+  .debug-key { color: #6366f1; }
+
+  .debug-val {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* History */
+  .history {
+    margin-top: 1.25rem;
+  }
+
+  .history-title {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 0.6rem;
+  }
+
+  .history-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .history-chip {
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-family: 'Space Mono', monospace;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--surface);
+    transition: transform 0.15s, opacity 0.15s;
+    font-weight: 700;
+  }
+
+  .history-chip:hover { transform: scale(1.05); opacity: 0.9; }
+
+  .clear-btn {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    padding: 0.2rem 0;
+    transition: color 0.2s;
+    float: right;
+  }
+
+  .clear-btn:hover { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <p class="label-mono">EasyChat · Garry's Mod</p>
+    <h1><span>PastelizeNick</span> Preview</h1>
+  </header>
+
+  <div class="input-area">
+    <div class="input-label">닉네임 입력</div>
+    <input type="text" id="nickInput" placeholder="닉네임을 입력하세요..." autocomplete="off" />
+  </div>
+
+  <div class="preview-card">
+    <div class="color-swatch" id="swatch"></div>
+    <div class="nick-display empty" id="nickDisplay">닉네임을 입력하면 색상이 표시됩니다</div>
+  </div>
+
+  <div class="debug-grid" id="debugGrid" style="display:none">
+    <div class="debug-row">
+      <span class="debug-key">hash</span>
+      <span class="debug-val" id="dbgHash">—</span>
+    </div>
+    <div class="debug-row">
+      <span class="debug-key">hue</span>
+      <span class="debug-val" id="dbgHue">—</span>
+    </div>
+    <div class="debug-row">
+      <span class="debug-key">saturation</span>
+      <span class="debug-val" id="dbgSat">—</span>
+    </div>
+    <div class="debug-row">
+      <span class="debug-key">value (brightness)</span>
+      <span class="debug-val" id="dbgVal">—</span>
+    </div>
+    <div class="debug-row">
+      <span class="debug-key">rgb</span>
+      <span class="debug-val" id="dbgRgb">—</span>
+    </div>
+    <div class="debug-row">
+      <span class="debug-key">hex</span>
+      <span class="debug-val" id="dbgHex">—</span>
+    </div>
+  </div>
+
+  <div class="history" id="historySection" style="display:none">
+    <div class="history-title">
+      최근 기록
+      <button class="clear-btn" id="clearBtn">지우기</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</div>
+
+<script>
+// ── Lua 로직 그대로 JS로 포팅 ──────────────────────────────────────────────
+
+function stringHash(text) {
+  const MOD1 = 4294967279n; // 2^32 - 17
+  const MOD2 = 4294967291n; // 2^32 - 5
+
+  let counter = 1n;
+  const len = text.length;
+
+  for (let i = 0; i < len; i += 3) {
+    const b0 = BigInt(text.charCodeAt(i));
+    const b1 = i + 1 < len ? BigInt(text.charCodeAt(i + 1)) : BigInt(len - i + 256);
+    const b2 = i + 2 < len ? BigInt(text.charCodeAt(i + 2)) : BigInt(len - i + 256);
+
+    counter =
+      (counter * 8161n) % MOD1 +
+      b0 * 16776193n +
+      b1 * 8372226n +
+      b2 * 3932164n;
+  }
+
+  return Number(counter % MOD2);
+}
+
+function hsvToRgb(h, s, v) {
+  // h: 0-360, s: 0-1, v: 0-1
+  const c = v * s;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = v - c;
+  let r, g, b;
+
+  if      (h < 60)  { r = c; g = x; b = 0; }
+  else if (h < 120) { r = x; g = c; b = 0; }
+  else if (h < 180) { r = 0; g = c; b = x; }
+  else if (h < 240) { r = 0; g = x; b = c; }
+  else if (h < 300) { r = x; g = 0; b = c; }
+  else              { r = c; g = 0; b = x; }
+
+  return {
+    r: Math.round((r + m) * 255),
+    g: Math.round((g + m) * 255),
+    b: Math.round((b + m) * 255),
+  };
+}
+
+function pastelizeNick(nick) {
+  const hash = stringHash(nick);
+  const hue      = (hash % 180) * 2;          // 0–358
+  const satLow   = hash % 3 === 0;            // 0.3 or 0.6
+  const valDark  = hash % 127 === 0;          // 0.6 or 1.0
+  const s = satLow  ? 0.3 : 0.6;
+  const v = valDark ? 0.6 : 1.0;
+  const rgb = hsvToRgb(hue, s, v);
+  return { hash, hue, s, v, rgb };
+}
+
+function toHex(r, g, b) {
+  return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+// ── UI ──────────────────────────────────────────────────────────────────────
+
+const input       = document.getElementById('nickInput');
+const swatch      = document.getElementById('swatch');
+const nickDisplay = document.getElementById('nickDisplay');
+const debugGrid   = document.getElementById('debugGrid');
+const histSec     = document.getElementById('historySection');
+const histList    = document.getElementById('historyList');
+const clearBtn    = document.getElementById('clearBtn');
+
+let history = [];
+
+function updatePreview(nick) {
+  if (!nick) {
+    swatch.style.backgroundColor = '';
+    swatch.style.setProperty('--nick-color', 'transparent');
+    nickDisplay.textContent = '닉네임을 입력하면 색상이 표시됩니다';
+    nickDisplay.classList.add('empty');
+    nickDisplay.style.color = '';
+    debugGrid.style.display = 'none';
+    return;
+  }
+
+  const { hash, hue, s, v, rgb } = pastelizeNick(nick);
+  const hex = toHex(rgb.r, rgb.g, rgb.b);
+  const cssColor = `rgb(${rgb.r},${rgb.g},${rgb.b})`;
+
+  // Swatch
+  swatch.style.backgroundColor = cssColor;
+  swatch.style.setProperty('--nick-color', cssColor);
+
+  // Nick text
+  nickDisplay.textContent = nick;
+  nickDisplay.style.color = cssColor;
+  nickDisplay.classList.remove('empty');
+
+  // Debug
+  debugGrid.style.display = 'block';
+  document.getElementById('dbgHash').textContent = hash.toLocaleString();
+  document.getElementById('dbgHue').textContent  = `${hue}°`;
+  document.getElementById('dbgSat').textContent  = `${(s * 100).toFixed(0)}%`;
+  document.getElementById('dbgVal').textContent  = `${(v * 100).toFixed(0)}%`;
+  document.getElementById('dbgRgb').textContent  = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+  document.getElementById('dbgHex').textContent  = hex;
+}
+
+function addHistory(nick) {
+  if (!nick || history.includes(nick)) return;
+  history.unshift(nick);
+  if (history.length > 12) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  histList.innerHTML = '';
+  history.forEach(nick => {
+    const { rgb } = pastelizeNick(nick);
+    const hex = toHex(rgb.r, rgb.g, rgb.b);
+    const chip = document.createElement('div');
+    chip.className = 'history-chip';
+    chip.textContent = nick;
+    chip.style.color = hex;
+    chip.style.borderColor = hex + '44';
+    chip.addEventListener('click', () => {
+      input.value = nick;
+      updatePreview(nick);
+    });
+    histList.appendChild(chip);
+  });
+  histSec.style.display = history.length ? 'block' : 'none';
+}
+
+input.addEventListener('input', () => updatePreview(input.value));
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && input.value.trim()) {
+    addHistory(input.value.trim());
+  }
+});
+
+clearBtn.addEventListener('click', () => {
+  history = [];
+  renderHistory();
+});
+</script>
+</body>
+</html>
